@@ -1,65 +1,64 @@
 import {baseUrl} from "../resources/baseUrl.js";
 
-const url = baseUrl + 'enheter/?page=0&size=1000';
+let url = baseUrl;
 const errorContainer = document.querySelector(".error-container");
-let companiesList = [];
+let enheterListe = [];
 
-// Hent enheter fra APIen
-(async function hentEnheter(){
+// Funksjon for å hente enheter fra APIen
+async function hentEnheter(){
   try {
     const svar = await fetch(url);
     const enheter = await svar.json();
-    companiesList = enheter._embedded.enheter;
+    if(enheter._embedded){
+      enheterListe = enheter._embedded.enheter;
+      tegneDropdown();
+    }
   } catch (error) {
     errorContainer.innerHTML = `Bekglager, en feil har oppstått. Detaljer: ${error}`;
   }
-})();
-
-// Funksjon for å filtrer enheter
-function filterEnheter(list, searchText){
-  const filtrertEnheter = list.filter((enhet)=>{
-    if(enhet.organisasjonsnummer.includes(searchText.toLowerCase()) || enhet.navn.toLowerCase().includes(searchText.toLowerCase())){
-      return true
-    }
-  })
-  return filtrertEnheter;
-}
+};
 
 const searchInput = document.querySelector(".main-search");
 const dropDown = document.querySelector(".search-dropdown");
+// 982831962
 
-// Filtrer og tegne enheter fortløppende
+// Detekt keyup og hent enheter
 searchInput.onkeyup = (event)=>{
   dropDown.innerHTML = "";
   if(!event.target.value){
-    return
+    return;
   }
-  let filtrertEnheter = filterEnheter(companiesList, event.target.value);
-  filtrertEnheter.forEach(enhet => {
+  if(isNaN(parseInt(event.target.value))){
+    url = baseUrl + "enheter?navn=" + event.target.value.split(" ").join("+");
+  } else if(!isNaN(parseInt(event.target.value)) && event.target.value.trim().length === 9){
+    url = baseUrl + "enheter?organisasjonsnummer=" + event.target.value.trim();
+  } else return;
+  hentEnheter();
+}
+
+function tegneDropdown(){
+  enheterListe.forEach(enhet => {
     dropDown.innerHTML += 
     `<div class="search-dropdown__item">
       <div>${enhet.organisasjonsnummer}</div>
       <div>${enhet.navn}</div>
     </div>`
   });
-  if(!filtrertEnheter.length){
-    dropDown.innerHTML = "<p>Ingen resultater</p>"; 
-  }
   const dropdownItems = document.querySelectorAll(".search-dropdown__item");
   const modal = document.querySelector(".modal");
   for(let i = 0; i< dropdownItems.length; i++){
     dropdownItems[i].addEventListener("click", ()=>{
-      const googleMapsLink = "https://www.google.com/maps/search/?api=1&query=" + filtrertEnheter[i].forretningsadresse.adresse[0].split(" ").join("+") + "%2C" + filtrertEnheter[i].forretningsadresse.postnummer;
+      const googleMapsLink = "https://www.google.com/maps/search/?api=1&query=" + enheterListe[i].forretningsadresse.adresse[0].split(" ").join("+") + "%2C" + enheterListe[i].forretningsadresse.postnummer;
       modal.classList.add("åpen");
       modal.innerHTML = `
       <button class="lukke"></button>
-      <h3>${filtrertEnheter[i].navn}</h3>
-      <div>Organisasjonsnummer: ${filtrertEnheter[i].organisasjonsnummer}</div>
-      <div>Organisasjonsform: ${filtrertEnheter[i].organisasjonsform.beskrivelse}</div>
+      <h3>${enheterListe[i].navn}</h3>
+      <div>Organisasjonsnummer: ${enheterListe[i].organisasjonsnummer}</div>
+      <div>Organisasjonsform: ${enheterListe[i].organisasjonsform.beskrivelse}</div>
       <div>Adresse:</div>
-      <a target=”_blank” href="${googleMapsLink}"><p>${filtrertEnheter[i].forretningsadresse.adresse[0]}<br>
-        ${filtrertEnheter[i].forretningsadresse.kommune}<br>
-        ${filtrertEnheter[i].forretningsadresse.postnummer}
+      <a target=”_blank” href="${googleMapsLink}"><p>${enheterListe[i].forretningsadresse.adresse[0]}<br>
+        ${enheterListe[i].forretningsadresse.kommune}<br>
+        ${enheterListe[i].forretningsadresse.postnummer}
         </p>
       </a>
       `;
@@ -69,5 +68,8 @@ searchInput.onkeyup = (event)=>{
       modal.innerHTML = "";
       }
     })
+  }
+  if(!enheterListe.length){
+    dropDown.innerHTML = "<p>Ingen resultater</p>"; 
   }
 }
