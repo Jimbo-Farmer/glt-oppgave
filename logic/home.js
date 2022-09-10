@@ -28,7 +28,7 @@ function filterEnheter(list, searchText){
 const searchInput = document.querySelector(".main-search");
 const dropDown = document.querySelector(".search-dropdown");
 
-// Filtrer og tegne enheter forløppende
+// Filtrer og tegne enheter fortløppende
 searchInput.onkeyup = (event)=>{
   dropDown.innerHTML = "";
   if(!event.target.value){
@@ -43,8 +43,7 @@ searchInput.onkeyup = (event)=>{
     </div>`
   });
   if(!filtrertEnheter.length){
-    dropDown.innerHTML = "<p>Ingen resultater</p>";
-    
+    dropDown.innerHTML = "<p>Ingen resultater</p>"; 
   }
   const dropdownItems = document.querySelectorAll(".search-dropdown__item");
   const modal = document.querySelector(".modal");
