@@ -5,7 +5,8 @@ body {
 }
 
 header {
-  background-color: cornflowerblue;
+  background-color: #303030;
+  color: white;
 }
 
 main {
@@ -45,7 +46,7 @@ h2 {
   left: 5%;
   border: 2px solid black;
   border-radius: 5px;
-  background-color: rgb(255, 246, 189);
+  background-color: rgb(193, 202, 255);
   padding: 20px 5%;
   box-sizing: border-box;
 }
